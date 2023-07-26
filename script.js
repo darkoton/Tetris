@@ -3,8 +3,9 @@ class Tetris {
     this.interval = 400
     this.body = document.querySelector('.game')
     this.next = 0
-
+    this.pauseState = false
     this.moveInterval
+    this.falls = null
   }
   generate() {
     const figures = [
@@ -44,18 +45,20 @@ class Tetris {
         left: 120
       }]
     const colors = ["#00f0f0", "#0000f0", "#f0a100", "#f0f000", "#00f000", "#a100f0", "#f00000"]
-    let randomFigureIndex = Math.trunc(Math.random() * figures.length)
-    let randomColorIndex = Math.trunc(Math.random() * colors.length)
+
+    if (!this.falls) {
+      let randomFigureIndex = Math.trunc(Math.random() * figures.length)
+      let randomColorIndex = Math.trunc(Math.random() * colors.length)
 
 
-    this.body.innerHTML += `
+      this.body.innerHTML += `
         <div class="${figures[randomFigureIndex].name} figure" data-color="${colors[randomColorIndex]}" data-state="falls" data-top="${figures[randomFigureIndex].top}" data-left="${figures[randomFigureIndex].left}" data-turn="1">
           <span></span>
           <span></span>
           <span></span>
           <span></span>
         </div>
-      `
+      `}
 
     this.falls = document.querySelector('[data-state="falls"]')
 
@@ -86,13 +89,20 @@ class Tetris {
       if ((this.falls.offsetTop + this.falls.offsetHeight) == 600) {
         clearInterval(this.moveInterval)
         this.falls.dataset.state = 'stand'
+        this.falls = null
         this.generate()
       }
 
     }, 100)
   }
   pause() {
-    clearInterval(this.moveInterval)
+    if (!this.pauseState) {
+      this.pauseState = true
+      clearInterval(this.moveInterval)
+    } else {
+      this.pauseState = false
+      this.start()
+    }
   }
   moveLeft() {
     if ((this.falls.classList.contains('I') || this.falls.classList.contains('L')) && (this.falls.offsetLeft - 30) < -30) return
