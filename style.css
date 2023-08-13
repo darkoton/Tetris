@@ -50,15 +50,16 @@ body{
 
 .game{
   width: calc(100% - 60px);
-  height: calc(100% - 60px);
+  height: calc(100% - 30px);
 
   display: grid;
   grid-template-columns: repeat(10, 30px);
-  grid-template-rows: repeat(20, 30px);
-  position: relative;
+  grid-template-rows: repeat(21, 30px);
+  position: absolute;
   top: 0;
-  left: 0;
+  left: 30px;
   overflow: hidden;
+  z-index: 2;
 }
 
 .block{
