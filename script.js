@@ -23,7 +23,7 @@ class Tetris {
     this.figureFall = null
     this.pauseState = false
     this.next = 0
-    this.interval = 400
+    this.interval = 1000
     this.moveInterval
   }
 
@@ -43,7 +43,7 @@ class Tetris {
     const some = (el) => {
       let neighbor = document.querySelector(`.cell[data-row='${+el.dataset.row + 1}'][data-col='${el.dataset.col}']`)
 
-      if (el.style.gridRowEnd == 22 || (!this.figureFall.cells.includes(neighbor) && neighbor)) {
+      if (+el.dataset.row == 21 || (!this.figureFall.cells.includes(neighbor) && neighbor)) {
         return true
       }
     }
@@ -61,9 +61,9 @@ class Tetris {
         return
       }
       this.figureFall.cells.forEach(el => {
-        row = el.style.gridRowEnd
-        el.dataset.row = +el.dataset.row + 1
-        el.style.gridRow = `${row} / ${+row + 1}`
+        row = +el.dataset.row
+        el.dataset.row = row + 1
+        el.style.gridRow = `${+el.dataset.row} / ${+el.dataset.row + 1}`
       })
     }, 100)
   }
@@ -82,18 +82,18 @@ class Tetris {
     if (direction == 'left') {
       if (!this.figureFall.cells.some(checkWallLeft)) {
         this.figureFall.cells.forEach(el => {
-          col = el.style.gridColumnStart
-          el.dataset.col = +el.dataset.col - 1
-          el.style.gridColumn = `${col - 1} / ${col}`
+          col = el.dataset.col - 1
+          el.dataset.col = col
+          el.style.gridColumn = `${col} / ${col + 1}`
         })
       }
     }
     if (direction == 'right') {
       if (!this.figureFall.cells.some(checkWallRight)) {
         this.figureFall.cells.forEach(el => {
-          col = el.style.gridColumnEnd
-          el.dataset.col = +el.dataset.col + 1
-          el.style.gridColumn = `${col} / ${+col + 1}`
+          col = +el.dataset.col + 1
+          el.dataset.col = col
+          el.style.gridColumn = `${col} / ${col + 1}`
         })
       }
     }
@@ -118,6 +118,13 @@ class Tetris {
   start() {
     this.generete()
   }
+  rotate() {
+
+    let cols = this.figureFall.cells.map(el => +el.dataset.col)
+    let rows = this.figureFall.cells.map(el => +el.dataset.row)
+
+    this.figureFall.rotateFigure(cols, rows)
+  }
 }
 
 class Figure {
@@ -140,31 +147,57 @@ class Figure {
 
     this.setPosition()
   }
-  setPosition() {
+  rotateFigure(styleCols, styleRows) {
+    this.rotate = (this.rotate + 1) == 4 ? 1 : this.rotate + 1
+    this.setPosition(styleCols, styleRows)
+  }
+  setPosition(styleCols = null, styleRows = null) {
     if (this.type == 'I') {
-      //COL
-      this.cells[0].style.gridColumn = "4 / 5"
-      this.cells[1].style.gridColumn = "5 / 6"
-      this.cells[2].style.gridColumn = "6 / 7"
-      this.cells[3].style.gridColumn = "7 / 8"
+      if (!(styleCols && styleRows)) {
+        styleCols = [4, 5, 6, 7]
+        styleRows = [2, 2, 2, 2]
+      }
 
-      //ROW
-      this.cells[0].style.gridRow = "2 / 3"
-      this.cells[1].style.gridRow = "2 / 3"
-      this.cells[2].style.gridRow = "2 / 3"
-      this.cells[3].style.gridRow = "2 / 3"
+      if (this.rotate == 1 || this.rotate == 3) {
+        //COL
+        this.cells.forEach((cell, index) => {
+          cell.style.gridColumn = `${styleCols[index]} / ${styleCols[index] + 1}`
+          cell.style.gridRow = `${styleRows[index]} / ${styleRows[index] + 1}`
 
-      //POSITION
-      this.cells[0].dataset.row = "1"
-      this.cells[1].dataset.row = "1"
-      this.cells[2].dataset.row = "1"
-      this.cells[3].dataset.row = "1"
+          cell.dataset.row = styleRows[index]
+          cell.dataset.col = styleCols[index]
+        })
 
-      this.cells[0].dataset.col = "4"
-      this.cells[1].dataset.col = "5"
-      this.cells[2].dataset.col = "6"
-      this.cells[3].dataset.col = "7"
-      return
+        return
+      }
+
+      if (this.rotate == 2 || this.rotate == 4) {
+        //COL
+        this.cells[0].style.gridColumn = `${styleCols[0] + 1} / ${styleCols[0] + 2}`
+        this.cells[1].style.gridColumn = `${styleCols[1]} / ${styleCols[1] + 1}`
+        this.cells[2].style.gridColumn = `${styleCols[2] - 1} / ${styleCols[2]}`
+        this.cells[3].style.gridColumn = `${styleCols[3] - 2} / ${styleCols[3] - 1}`
+
+        //ROW
+        console.log(styleRows);
+        this.cells[0].style.gridRow = `${styleRows[0] - 1} / ${styleRows[0] - 1}`
+        this.cells[1].style.gridRow = `${styleRows[1]} / ${styleRows[1] + 1}`
+        this.cells[2].style.gridRow = `${styleRows[2] + 1} / ${styleRows[2] + 2}`
+        this.cells[3].style.gridRow = `${styleRows[3] + 2} / ${styleRows[3] + 3}`
+
+        //POSITION  
+        this.cells[0].dataset.row = styleRows[0] - 1
+        this.cells[1].dataset.row = styleRows[1]
+        this.cells[2].dataset.row = +styleRows[2] + 1
+        this.cells[3].dataset.row = +styleRows[3] + 2
+
+        this.cells[0].dataset.col = +styleCols[0] + 1
+        this.cells[1].dataset.col = styleCols[1]
+        this.cells[2].dataset.col = styleCols[2] - 1
+        this.cells[3].dataset.col = styleCols[3] - 2
+        return
+      }
+
     }
     if (this.type == 'J') {
 
@@ -181,10 +214,10 @@ class Figure {
       this.cells[3].style.gridRow = "2 / 3"
 
       //POSITION
-      this.cells[0].dataset.row = "0"
-      this.cells[1].dataset.row = "1"
-      this.cells[2].dataset.row = "1"
-      this.cells[3].dataset.row = "1"
+      this.cells[0].dataset.row = "1"
+      this.cells[1].dataset.row = "2"
+      this.cells[2].dataset.row = "2"
+      this.cells[3].dataset.row = "2"
 
       this.cells[0].dataset.col = "5"
       this.cells[1].dataset.col = "5"
@@ -206,10 +239,10 @@ class Figure {
       this.cells[3].style.gridRow = "2 / 3"
 
       //POSITION
-      this.cells[0].dataset.row = "0"
-      this.cells[1].dataset.row = "1"
-      this.cells[2].dataset.row = "1"
-      this.cells[3].dataset.row = "1"
+      this.cells[0].dataset.row = "1"
+      this.cells[1].dataset.row = "2"
+      this.cells[2].dataset.row = "2"
+      this.cells[3].dataset.row = "2"
 
       this.cells[0].dataset.col = "7"
       this.cells[1].dataset.col = "5"
@@ -232,10 +265,10 @@ class Figure {
       this.cells[3].style.gridRow = "2 / 3"
 
       //POSITION
-      this.cells[0].dataset.row = "0"
-      this.cells[1].dataset.row = "0"
-      this.cells[2].dataset.row = "1"
-      this.cells[3].dataset.row = "1"
+      this.cells[0].dataset.row = "1"
+      this.cells[1].dataset.row = "1"
+      this.cells[2].dataset.row = "2"
+      this.cells[3].dataset.row = "2"
 
       this.cells[0].dataset.col = "5"
       this.cells[1].dataset.col = "6"
@@ -256,10 +289,10 @@ class Figure {
       this.cells[2].style.gridRow = "2 / 3"
       this.cells[3].style.gridRow = "2 / 3"
 
-      this.cells[0].dataset.row = "0"
-      this.cells[1].dataset.row = "0"
-      this.cells[2].dataset.row = "1"
-      this.cells[3].dataset.row = "1"
+      this.cells[0].dataset.row = "1"
+      this.cells[1].dataset.row = "1"
+      this.cells[2].dataset.row = "2"
+      this.cells[3].dataset.row = "2"
 
       this.cells[0].dataset.col = "6"
       this.cells[1].dataset.col = "7"
@@ -280,10 +313,10 @@ class Figure {
       this.cells[2].style.gridRow = "2 / 3"
       this.cells[3].style.gridRow = "2 / 3"
 
-      this.cells[0].dataset.row = "0"
-      this.cells[1].dataset.row = "1"
-      this.cells[2].dataset.row = "1"
-      this.cells[3].dataset.row = "1"
+      this.cells[0].dataset.row = "1"
+      this.cells[1].dataset.row = "2"
+      this.cells[2].dataset.row = "2"
+      this.cells[3].dataset.row = "2"
 
       this.cells[0].dataset.col = "6"
       this.cells[1].dataset.col = "5"
@@ -304,10 +337,10 @@ class Figure {
       this.cells[2].style.gridRow = "2 / 3"
       this.cells[3].style.gridRow = "2 / 3"
 
-      this.cells[0].dataset.row = "0"
-      this.cells[1].dataset.row = "0"
-      this.cells[2].dataset.row = "1"
-      this.cells[3].dataset.row = "1"
+      this.cells[0].dataset.row = "1"
+      this.cells[1].dataset.row = "1"
+      this.cells[2].dataset.row = "2"
+      this.cells[3].dataset.row = "2"
 
       this.cells[0].dataset.col = "5"
       this.cells[1].dataset.col = "6"
@@ -320,7 +353,7 @@ class Figure {
 
 const tetris = new Tetris('.game')
 
-tetris.start()
+// tetris.start()
 
 window.addEventListener('keydown', event => {
   if (event.code == 'ArrowUp' || event.code == 'KeyW') {
