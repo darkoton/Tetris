@@ -67,6 +67,7 @@ class Tetris {
       })
     }, 100)
   }
+
   move(direction) {
     const checkWallLeft = cell => {
       let neighbor = document.querySelector(`.cell[data-row='${cell.dataset.row}'][data-col='${cell.dataset.col - 1}']`)
@@ -78,6 +79,7 @@ class Tetris {
 
       return cell.dataset.col == 10 || (!this.figureFall.cells.includes(neighbor) && neighbor)
     }
+
     let col
     if (direction == 'left') {
       if (!this.figureFall.cells.some(checkWallLeft)) {
@@ -118,13 +120,6 @@ class Tetris {
   start() {
     this.generete()
   }
-  rotate() {
-
-    let cols = this.figureFall.cells.map(el => +el.dataset.col)
-    let rows = this.figureFall.cells.map(el => +el.dataset.row)
-
-    this.figureFall.rotateFigure(cols, rows)
-  }
 }
 
 class Figure {
@@ -145,59 +140,117 @@ class Figure {
       this.cells[i] = cell
     }
 
+    this.checkWallLeft = cell => {
+      let neighbor = document.querySelector(`.cell[data-row='${cell.dataset.row}'][data-col='${cell.dataset.col - 1}']`)
+
+      return cell.dataset.col == 1 || (!this.cells.includes(neighbor) && neighbor)
+    }
+    this.checkWallRight = cell => {
+      let neighbor = document.querySelector(`.cell[data-row='${cell.dataset.row}'][data-col='${+cell.dataset.col + 1}']`)
+
+      return cell.dataset.col == 10 || (!this.cells.includes(neighbor) && neighbor)
+    }
+
     this.setPosition()
   }
-  rotateFigure(styleCols, styleRows) {
-    this.rotate = (this.rotate + 1) == 4 ? 1 : this.rotate + 1
-    this.setPosition(styleCols, styleRows)
+  rotateFigure() {
+    const newRotate = (this.rotate % 4) + 1;
+    const originalCols = this.cells.map(cell => +cell.dataset.col);
+    const originalRows = this.cells.map(cell => +cell.dataset.row);
+    const functions = {
+      rotateI: this.rotateI,
+      // rotateI: this.rotateI,
+      // rotateI: this.rotateI,
+      // rotateI: this.rotateI,
+      // rotateI: this.rotateI,
+
+    }
+    this.rotate = newRotate;
+    functions[`rotate${this.type}`].call(this, originalCols, originalRows);
+
+
+  }
+  rotateI(styleCols = null, styleRows = null) {
+    if (this.rotate == 1 || this.rotate == 3) {
+      if (this.cells.some(this.checkWallRight)) {
+        styleCols = styleCols.map(el => el - 2)
+      }
+      //COL
+      this.cells[0].style.gridColumn = `${styleCols[0] - 1} / ${styleCols[0]}`
+      this.cells[1].style.gridColumn = `${styleCols[1]} / ${styleCols[1] + 1}`
+      this.cells[2].style.gridColumn = `${styleCols[2] + 1} / ${styleCols[2] + 2}`
+      this.cells[3].style.gridColumn = `${styleCols[3] + 2} / ${styleCols[3] + 3}`
+
+      // //ROW
+      this.cells[0].style.gridRow = `${styleRows[0] + 1} / ${styleRows[0] + 2}`
+      this.cells[1].style.gridRow = `${styleRows[1]} / ${styleRows[1] + 1}`
+      this.cells[2].style.gridRow = `${styleRows[2] - 1} / ${styleRows[2]}`
+      this.cells[3].style.gridRow = `${styleRows[3] - 2} / ${styleRows[3] - 1}`
+
+      // //POSITION  
+      this.cells[0].dataset.row = styleRows[0] + 1
+      this.cells[1].dataset.row = styleRows[1]
+      this.cells[2].dataset.row = styleRows[2] - 1
+      this.cells[3].dataset.row = styleRows[3] - 2
+
+      this.cells[0].dataset.col = styleCols[0] - 1
+      this.cells[1].dataset.col = styleCols[1]
+      this.cells[2].dataset.col = styleCols[2] + 1
+      this.cells[3].dataset.col = styleCols[3] + 2
+      return
+    }
+
+    if (this.rotate == 2 || this.rotate == 4) {
+      //COL
+      this.cells[0].style.gridColumn = `${styleCols[0] + 1} / ${styleCols[0] + 2}`
+      this.cells[1].style.gridColumn = `${styleCols[1]} / ${styleCols[1] + 1}`
+      this.cells[2].style.gridColumn = `${styleCols[2] - 1} / ${styleCols[2]}`
+      this.cells[3].style.gridColumn = `${styleCols[3] - 2} / ${styleCols[3] - 1}`
+
+      //ROW
+      this.cells[0].style.gridRow = `${styleRows[0] - 1} / ${styleRows[0]}`
+      this.cells[1].style.gridRow = `${styleRows[1]} / ${styleRows[1] + 1}`
+      this.cells[2].style.gridRow = `${styleRows[2] + 1} / ${styleRows[2] + 2}`
+      this.cells[3].style.gridRow = `${styleRows[3] + 2} / ${styleRows[3] + 3}`
+
+      //POSITION  
+      this.cells[0].dataset.row = styleRows[0] - 1
+      this.cells[1].dataset.row = styleRows[1]
+      this.cells[2].dataset.row = styleRows[2] + 1
+      this.cells[3].dataset.row = styleRows[3] + 2
+
+      this.cells[0].dataset.col = styleCols[0] + 1
+      this.cells[1].dataset.col = styleCols[1]
+      this.cells[2].dataset.col = styleCols[2] - 1
+      this.cells[3].dataset.col = styleCols[3] - 2
+      return
+    }
   }
   setPosition(styleCols = null, styleRows = null) {
     if (this.type == 'I') {
-      if (!(styleCols && styleRows)) {
-        styleCols = [4, 5, 6, 7]
-        styleRows = [2, 2, 2, 2]
-      }
+      //COL
+      this.cells[0].style.gridColumn = "4 / 5"
+      this.cells[1].style.gridColumn = "5 / 6"
+      this.cells[2].style.gridColumn = "6 / 7"
+      this.cells[3].style.gridColumn = "7 / 8"
 
-      if (this.rotate == 1 || this.rotate == 3) {
-        //COL
-        this.cells.forEach((cell, index) => {
-          cell.style.gridColumn = `${styleCols[index]} / ${styleCols[index] + 1}`
-          cell.style.gridRow = `${styleRows[index]} / ${styleRows[index] + 1}`
+      //ROW
+      this.cells[0].style.gridRow = "2 / 3"
+      this.cells[1].style.gridRow = "2 / 3"
+      this.cells[2].style.gridRow = "2 / 3"
+      this.cells[3].style.gridRow = "2 / 3"
 
-          cell.dataset.row = styleRows[index]
-          cell.dataset.col = styleCols[index]
-        })
+      //POSITION
+      this.cells[0].dataset.row = "1"
+      this.cells[1].dataset.row = "1"
+      this.cells[2].dataset.row = "1"
+      this.cells[3].dataset.row = "1"
 
-        return
-      }
-
-      if (this.rotate == 2 || this.rotate == 4) {
-        //COL
-        this.cells[0].style.gridColumn = `${styleCols[0] + 1} / ${styleCols[0] + 2}`
-        this.cells[1].style.gridColumn = `${styleCols[1]} / ${styleCols[1] + 1}`
-        this.cells[2].style.gridColumn = `${styleCols[2] - 1} / ${styleCols[2]}`
-        this.cells[3].style.gridColumn = `${styleCols[3] - 2} / ${styleCols[3] - 1}`
-
-        //ROW
-        console.log(styleRows);
-        this.cells[0].style.gridRow = `${styleRows[0] - 1} / ${styleRows[0] - 1}`
-        this.cells[1].style.gridRow = `${styleRows[1]} / ${styleRows[1] + 1}`
-        this.cells[2].style.gridRow = `${styleRows[2] + 1} / ${styleRows[2] + 2}`
-        this.cells[3].style.gridRow = `${styleRows[3] + 2} / ${styleRows[3] + 3}`
-
-        //POSITION  
-        this.cells[0].dataset.row = styleRows[0] - 1
-        this.cells[1].dataset.row = styleRows[1]
-        this.cells[2].dataset.row = +styleRows[2] + 1
-        this.cells[3].dataset.row = +styleRows[3] + 2
-
-        this.cells[0].dataset.col = +styleCols[0] + 1
-        this.cells[1].dataset.col = styleCols[1]
-        this.cells[2].dataset.col = styleCols[2] - 1
-        this.cells[3].dataset.col = styleCols[3] - 2
-        return
-      }
-
+      this.cells[0].dataset.col = "4"
+      this.cells[1].dataset.col = "5"
+      this.cells[2].dataset.col = "6"
+      this.cells[3].dataset.col = "7"
+      return
     }
     if (this.type == 'J') {
 
@@ -357,7 +410,7 @@ const tetris = new Tetris('.game')
 
 window.addEventListener('keydown', event => {
   if (event.code == 'ArrowUp' || event.code == 'KeyW') {
-    tetris.rotate()
+    tetris.figureFall.rotateFigure();
   }
 
   if (event.code == 'ArrowLeft' || event.code == 'KeyA') {
@@ -375,7 +428,6 @@ window.addEventListener('keydown', event => {
 window.addEventListener("keyup", event => {
   if (event.code == 'ArrowDown' || event.code == 'KeyS') {
     tetris.moveDown('up')
-    console.log('up');
   }
   if (event.code == 'Space') {
     tetris.pause()
