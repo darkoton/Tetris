@@ -32,7 +32,7 @@ class Tetris {
     const color = this.colors[Math.trunc(Math.random() * this.colors.length)]
 
 
-    this.figureFall = new Figure({ color, type: "S" })
+    this.figureFall = new Figure({ color, type: "Z" })
     this.figureFall.cells.forEach(cell => {
       this.cup.appendChild(cell)
     })
