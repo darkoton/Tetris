@@ -1,15 +1,6 @@
 class Tetris {
   constructor(cup) {
     this.cup = document.querySelector(cup)
-    this.figuresData = [
-      'I',
-      'J',
-      'L',
-      'O',
-      'S',
-      'T',
-      'Z'
-    ]
     this.colors = [
       "#00f0f0",
       "#0000f0",
@@ -28,11 +19,20 @@ class Tetris {
   }
 
   generete() {
-    const type = this.figuresData[Math.trunc(Math.random() * this.figuresData.length)]
+
     const color = this.colors[Math.trunc(Math.random() * this.colors.length)]
+    const figures = [
+      new I(color),
+      new J(color),
+      new L(color),
+      new O(color),
+      new S(color),
+      new T(color),
+      new Z(color)
+    ]
 
+    this.figureFall = figures[Math.trunc(Math.random() * figures.length)]
 
-    this.figureFall = new Figure({ color, type: "T" })
     this.figureFall.cells.forEach(cell => {
       this.cup.appendChild(cell)
     })
@@ -50,22 +50,33 @@ class Tetris {
 
     let row
     this.moveInterval = setInterval(() => {
-      let now = (new Date).getTime();
-      if (this.next && this.next > now) return;
-      this.next = now + this.interval;
+      // let now = (new Date).getTime();
+      // if (this.next && this.next > now) return;
+      // this.next = now + this.interval;
 
       if (Array.from(this.figureFall.cells).some(some)) {
         clearInterval(this.moveInterval)
         this.figureFall.state = 'lies'
-        // this.generete()
+        this.generete()
         return
       }
+
       this.figureFall.cells.forEach(el => {
         row = +el.dataset.row
         el.dataset.row = row + 1
         el.style.gridRow = `${+el.dataset.row} / ${+el.dataset.row + 1}`
       })
-    }, 100)
+
+      if (Array.from(this.figureFall.cells).some(some)) {
+        setTimeout(() => {
+
+          clearInterval(this.moveInterval)
+          this.figureFall.state = 'lies'
+          this.generete()
+          return
+        }, 200);
+      }
+    }, 500)
   }
 
   move(direction) {
@@ -128,10 +139,6 @@ const tetris = new Tetris('.game')
 tetris.start()
 
 window.addEventListener('keydown', event => {
-  if (event.code == 'ArrowUp' || event.code == 'KeyW') {
-    tetris.figureFall.rotateFigure();
-  }
-
   if (event.code == 'ArrowLeft' || event.code == 'KeyA') {
     tetris.move('left')
   }
@@ -147,6 +154,9 @@ window.addEventListener('keydown', event => {
 window.addEventListener("keyup", event => {
   if (event.code == 'ArrowDown' || event.code == 'KeyS') {
     tetris.moveDown('up')
+  }
+  if (event.code == 'ArrowUp' || event.code == 'KeyW') {
+    tetris.figureFall.rotateFigure();
   }
   if (event.code == 'Space') {
     tetris.pause()
