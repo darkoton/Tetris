@@ -5,6 +5,7 @@ class Figure {
     this.rotate = 1
     this.state = "fall"
     this.cells = []
+    this.paddCol = 0
 
     for (let i = 0; i < 4; i++) {
       const cell = document.createElement('span')
@@ -15,27 +16,22 @@ class Figure {
       this.cells[i] = cell
     }
 
-    this.checkWallLeft = cell => {
-      let neighbor = document.querySelector(`.cell[data-row='${cell.dataset.row}'][data-col='${+cell.dataset.col - 1}']`)
-      return cell.dataset.col == 1 || (!this.cells.includes(neighbor) && neighbor)
-    }
-    this.checkWallRight = cell => {
-      let neighbor = document.querySelector(`.cell[data-row='${cell.dataset.row}'][data-col='${+cell.dataset.col + 1}']`)
-      return cell.dataset.col == 10 || (!this.cells.includes(neighbor) && neighbor)
-    }
-
-    this.checkCell = (center, ...cols) => {
+    //checkCell - возвращает boolean
+    // true - клеток и стены нет,
+    // false - клетки или стина есть
+    this.checkCell = (center, rows, cols) => {
       let wall = false
-      let cells = cols.map(col => {
+      let cells = cols.map((col, index) => {
         if (+center.dataset.col + col < 1 || +center.dataset.col + col > 10) {
           wall = true
         }
-        return document.querySelector(`.cell[data-row='${center.dataset.row}'][data-col='${+center.dataset.col + col}']`)
+        return document.querySelector(`.cell[data-row='${+center.dataset.row + +rows[index]}'][data-col='${+center.dataset.col + +col}']`)
       })
       return cells.every(cell => {
         return !cell && !wall
       })
     }
+
     this.setPosition()
   }
 

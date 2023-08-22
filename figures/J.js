@@ -5,6 +5,33 @@ class J extends Figure {
     this.setPosition()
   }
 
+  hasPlace(center, ...cols) {
+    let negativ = null
+    let positiv = null
+    for (let i = 0; i < cols.length; i++) {
+      if (cols[i] < 0) {
+        negativ = i;
+      }
+      if (cols[i] > 0) {
+        positiv = i;
+      }
+
+      if (typeof negativ == 'number' && typeof positiv == 'number') {
+        break
+      }
+    }
+
+    this.paddCol = (center.dataset.col == 1 || (!this.checkCell(center, [0], [-1])) && this.checkCell(center, [0, 0], [1, 2])) ||
+      (!this.checkCell(center, [1], [1]) && this.checkCell(center, [0, 0], [1, 2])) ?
+      1 : (center.dataset.col == 10 || !this.checkCell(center, [0], [1])) && this.checkCell(center, [0, 0], [-2, -1]) ?
+        -1 : 0
+
+    return (this.checkCell(center, [0, 0, 1], [-1, 1, 1]) && center.dataset.col != 1 && center.dataset.col != 10)
+      || ((center.dataset.col == 1 || !this.checkCell(center, [0], [-1])) && this.checkCell(center, [0, 0], [1, 2]))
+      || ((center.dataset.col == 10 || !this.checkCell(center, [0], [1])) && this.checkCell(center, [0, 0], [-2, -1]))
+      || !this.checkCell(center, [1], [1]) && this.checkCell(center, [0, 1], [1, 2])
+  }
+
   setPosition() {
     //COL
     this.cells[0].style.gridColumn = "5 / 6"
@@ -32,14 +59,25 @@ class J extends Figure {
   }
 
   rotateFigure() {
+    if ((this.rotate == 1 || this.rotate == 3)) {
+      console.log(!this.checkCell(this.cells[1], [1], [0]));
+      if (this.cells[2].dataset.row >= 21 || !this.checkCell(this.cells[2], [1], [0])) {
+        return
+      }
+    }
+    if ((this.rotate == 2 || this.rotate == 4)) {
+      if (!this.hasPlace(this.cells[2], [-1, 1, 2])) {
+        return
+      }
+    }
+
     this.rotate = (this.rotate % 4) + 1;
     let styleCols = this.cells.map(cell => +cell.dataset.col);
     let styleRows = this.cells.map(cell => +cell.dataset.row);
 
     if (this.rotate == 1) {
-      if (this.cells.some(this.checkWallRight)) {
-        styleCols = styleCols.map(el => el - 1)
-      }
+      styleCols = styleCols.map(el => el + this.paddCol);
+
       //COL
       this.cells[0].style.gridColumn = `${styleCols[0]} / ${styleCols[0] + 1}`
       this.cells[1].style.gridColumn = `${styleCols[1] - 1} / ${styleCols[1]}`
@@ -94,9 +132,8 @@ class J extends Figure {
       return
     }
     if (this.rotate == 3) {
-      if (this.cells.some(this.checkWallLeft)) {
-        styleCols = styleCols.map(el => el + 1)
-      }
+      styleCols = styleCols.map(el => el + this.paddCol);
+
       //COL
       this.cells[0].style.gridColumn = `${styleCols[0]} / ${styleCols[0] + 1}`
       this.cells[1].style.gridColumn = `${styleCols[1] + 1} / ${styleCols[1] + 2}`

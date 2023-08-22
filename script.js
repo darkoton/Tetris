@@ -32,7 +32,7 @@ class Tetris {
     ]
 
     // this.figureFall = figures[Math.trunc(Math.random() * figures.length)]
-    this.figureFall = figures[0]
+    this.figureFall = figures[1]
 
     this.figureFall.cells.forEach(cell => {
       this.cup.appendChild(cell)
@@ -51,9 +51,9 @@ class Tetris {
 
     let row
     this.moveInterval = setInterval(() => {
-      let now = (new Date).getTime();
-      if (this.next && this.next > now) return;
-      this.next = now + this.interval;
+      // let now = (new Date).getTime();
+      // if (this.next && this.next > now) return;
+      // this.next = now + this.interval;
 
       if (Array.from(this.figureFall.cells).some(some)) {
         clearInterval(this.moveInterval)
@@ -69,15 +69,11 @@ class Tetris {
       })
 
       if (Array.from(this.figureFall.cells).some(some)) {
-        setTimeout(() => {
-
-          clearInterval(this.moveInterval)
-          this.figureFall.state = 'lies'
-          this.generete()
-          return
-        }, 200);
+        clearInterval(this.moveInterval)
+        this.figureFall.state = 'lies'
+        this.generete()
       }
-    }, 100)
+    }, 300)
   }
 
   move(direction) {

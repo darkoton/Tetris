@@ -1,32 +1,9 @@
 class I extends Figure {
   constructor(color) {
     super({ color });
-    this.paddCol = 0
-
-    this.aroundEmpty = () => {
-      let neighbors = [
-        document.querySelector(`.cell[data-row='${this.cells[1].dataset.row}'][data-col='${this.cells[1].dataset.col - 1}']`),
-        document.querySelector(`.cell[data-row='${this.cells[1].dataset.row}'][data-col='${+this.cells[1].dataset.col + 1}']`),
-        document.querySelector(`.cell[data-row='${this.cells[1].dataset.row}'][data-col='${+this.cells[1].dataset.col + 2}']`)
-      ]
-      return neighbors.some((el => Boolean(!el)))
-    }
-
-    this.haveEmptyLeft = () => {
-      let neighbor = document.querySelector(`.cell[data-row='${this.cells[1].dataset.row}'][data-col='${this.cells[1].dataset.col - 1}']`)
-      return this.cells[1].dataset.col != 1 && (!this.cells.includes(neighbor) && !neighbor)
-    }
-
-    this.haveEmptyRight = () => {
-      let neighbor1 = document.querySelector(`.cell[data-row='${this.cells[1].dataset.row}'][data-col='${+this.cells[1].dataset.col + 1}']`)
-      let neighbor2 = document.querySelector(`.cell[data-row='${this.cells[1].dataset.row}'][data-col='${+this.cells[1].dataset.col + 2}']`)
-      this.paddCol = this.cells[1].dataset.col == 9 || neighbor1 ? 1 : this.cells[1].dataset.col == 10 || neighbor2 ? 2 : null
-      return (this.cells[1].dataset.col != 9 && this.cells[1].dataset.col != 10) && ((!this.cells.includes(neighbor1) && !neighbor1) && (!this.cells.includes(neighbor2) && !neighbor2))
-    }
-
-
     this.setPosition()
   }
+
   hasPlace(center, ...cols) {
     let negativ = null
     let positiv = null
@@ -44,16 +21,15 @@ class I extends Figure {
     }
 
 
-    this.paddCol = (center.dataset.col == 1 || (!this.checkCell(center, -1)) && this.checkCell(center, 1, 2, 3)) ?
-      1 : ((center.dataset.col == 9 && this.checkCell(center, 1)) || (!this.checkCell(center, 2)) && this.checkCell(center, 1, -1, -2)) ?
-        -1 : (center.dataset.col == 10 || !this.checkCell(center, 1)) && this.checkCell(center, -3, -2, -1) ?
+    this.paddCol = (center.dataset.col == 1 || (!this.checkCell(center, [0], [-1])) && this.checkCell(center, [0, 0, 0], [1, 2, 3])) ?
+      1 : ((center.dataset.col == 9 && this.checkCell(center, [0], [1])) || (!this.checkCell(center, [0], [2])) && this.checkCell(center, [0, 0, 0], [1, -1, -2])) ?
+        -1 : (center.dataset.col == 10 || !this.checkCell(center, [0], [1])) && this.checkCell(center, [0], [-3, -2, -1]) ?
           -2 : 0
 
-
-    return (this.checkCell(center, -1, 1, 2) && center.dataset.col != 1 && center.dataset.col != 10)
-      || ((center.dataset.col == 1 || !this.checkCell(center, -1)) && this.checkCell(center, 1, 2, 3))
-      || (((center.dataset.col == 9 && this.checkCell(center, 1)) || !this.checkCell(center, 2)) && this.checkCell(center, -1, -2, 1))
-      || ((center.dataset.col == 10 || !this.checkCell(center, 1)) && this.checkCell(center, -3, -2, -1))
+    return (this.checkCell(center, [0, 0, 0], [-1, 1, 2]) && center.dataset.col != 1 && center.dataset.col != 10)
+      || ((center.dataset.col == 1 || !this.checkCell(center, [0], [-1])) && this.checkCell(center, [0, 0, 0], [1, 2, 3]))
+      || (((center.dataset.col == 9 && this.checkCell(center, [0], [1])) || !this.checkCell(center, [0], [2])) && this.checkCell(center, [0, 0, 0], [-1, -2, 1]))
+      || ((center.dataset.col == 10 || !this.checkCell(center, [0], [1])) && this.checkCell(center, [0, 0, 0], [-3, -2, -1]))
 
   }
 
@@ -83,8 +59,13 @@ class I extends Figure {
   }
 
   rotateFigure() {
+    if ((this.rotate == 1 || this.rotate == 3)) {
+      if (this.cells[1].dataset.row >= 20 || !this.checkCell(this.cells[1], [1, 2], [0, 0])) {
+        return
+      }
+    }
     if ((this.rotate == 2 || this.rotate == 4)) {
-      if (!this.hasPlace(this.cells[1], -1, 1, 2)) {
+      if (!this.hasPlace(this.cells[1], [-1, 1, 2])) {
         return
       }
     }
@@ -149,33 +130,5 @@ class I extends Figure {
 
       return
     }
-
-
-    // if (this.rotate == 2) {
-    //     //COL
-    //     this.cells[0].style.gridColumn = `${styleCols[0] + 1} / ${styleCols[0] + 2}`
-    //     this.cells[1].style.gridColumn = `${styleCols[1]} / ${styleCols[1] + 1}`
-    //     this.cells[2].style.gridColumn = `${styleCols[2] - 1} / ${styleCols[2]}`
-    //     this.cells[3].style.gridColumn = `${styleCols[3] - 2} / ${styleCols[3] - 1}`
-
-    //     //ROW
-    //     this.cells[0].style.gridRow = `${styleRows[0] - 1} / ${styleRows[0]}`
-    //     this.cells[1].style.gridRow = `${styleRows[1]} / ${styleRows[1] + 1}`
-    //     this.cells[2].style.gridRow = `${styleRows[2] + 1} / ${styleRows[2] + 2}`
-    //     this.cells[3].style.gridRow = `${styleRows[3] + 2} / ${styleRows[3] + 3}`
-
-    //     //POSITION  
-    //     this.cells[0].dataset.col = styleCols[0] + 1
-    //     this.cells[1].dataset.col = styleCols[1]
-    //     this.cells[2].dataset.col = styleCols[2] - 1
-    //     this.cells[3].dataset.col = styleCols[3] - 2
-
-    //     this.cells[0].dataset.row = styleRows[0] - 1
-    //     this.cells[1].dataset.row = styleRows[1]
-    //     this.cells[2].dataset.row = styleRows[2] + 1
-    //     this.cells[3].dataset.row = styleRows[3] + 2
-
-    //     return
-    // }
   }
 }
